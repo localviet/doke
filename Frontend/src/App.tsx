@@ -11,8 +11,11 @@ import { Navbar } from "./components/landing/Navbar";
 import { RankingsSection } from "./components/landing/RankingsSection";
 import { SocialProofSection } from "./components/landing/SocialProofSection";
 
+import ProtectedRoute from "./pages/ProtectedRoute";
+
 import { AuthPage } from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
+import EmailConfirmation from "./pages/extras/EmailConfirm";
 
 function LandingPage() {
   const [scrollY, setScrollY] = useState(0);
@@ -48,7 +51,15 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<AuthPage mode="login" />} />
       <Route path="/signup" element={<AuthPage mode="signup" />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/email-confirm" element={<EmailConfirmation />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

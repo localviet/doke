@@ -1,7 +1,23 @@
 import { Home, LogOut } from "lucide-react";
+import { useNavigate } from "react-router";
+import { supabase } from "../../lib/supabaseClient.js";
+
 import { Link } from "react-router";
 
 export function DashboardNav() {
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+
+    navigate("/");
+  }
+
   return (
     <nav
       className="sticky top-0 z-40 flex items-center justify-between px-5 py-4 md:px-10"
@@ -33,8 +49,9 @@ export function DashboardNav() {
         </span>
       </Link>
 
-      <Link
-        to="/login"
+      <button
+        type="button"
+        onClick={handleLogout}
         className="flex items-center gap-2 rounded-xl px-4 py-2 font-semibold transition-all hover:scale-105 active:scale-95"
         style={{
           background: "#CE2626",
@@ -47,7 +64,7 @@ export function DashboardNav() {
       >
         <LogOut size={16} strokeWidth={2.5} />
         Logout
-      </Link>
+      </button>
     </nav>
   );
 }

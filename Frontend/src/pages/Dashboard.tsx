@@ -13,8 +13,7 @@ export default function Dashboard() {
     <div
       className="min-h-screen overflow-x-hidden pb-16"
       style={{
-        background:
-          "radial-gradient(#1a1a1a12 1px, transparent 1px), #FFFDEB",
+        background: "radial-gradient(#1a1a1a12 1px, transparent 1px), #FFFDEB",
         backgroundSize: "22px 22px",
         fontFamily: "'Inter', sans-serif",
       }}

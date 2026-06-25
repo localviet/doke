@@ -1,11 +1,5 @@
-import {
-  ArrowLeft,
-  Home,
-  KeyRound,
-  Mail,
-  User,
-} from "lucide-react";
-import { Link } from "react-router";
+import { ArrowLeft, Home, KeyRound, Mail, User } from "lucide-react";
+import { Link, useNavigate } from "react-router";
 import { GlobalStyles } from "../components/landing/GlobalStyles";
 import {
   SketchCircle,
@@ -13,6 +7,8 @@ import {
   WiggleLine,
 } from "../components/landing/shared/Doodles";
 import { SketchCard } from "../components/landing/shared/SketchCard";
+import { useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 type AuthPageProps = {
   mode: "login" | "signup";
@@ -26,6 +22,56 @@ const fieldBaseStyle = {
 
 export function AuthPage({ mode }: AuthPageProps) {
   const isSignup = mode === "signup";
+  const navigate = useNavigate();
+  const [wrongLogin, setWrongLogin] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (isSignup) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (error) {
+        console.error(error.message);
+        setError(error.message);
+        setWrongLogin(true);
+        return;
+      }
+
+      console.log("Signed up:", data);
+      navigate("/email-confirm");
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error(error.message);
+        setError(error.message);
+        setWrongLogin(true);
+        return;
+      }
+
+      console.log("Logged in:", data);
+      navigate("/dashboard");
+    }
+  }
 
   return (
     <main
@@ -139,7 +185,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               </p>
             </div>
 
-            <form className="flex flex-col gap-5">
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
               {isSignup && (
                 <label className="block">
                   <span
@@ -166,6 +212,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                       style={{ background: "#ccc" }}
                     />
                     <input
+                      name="name"
                       type="text"
                       placeholder="Maya"
                       className="flex-1 h-full bg-transparent outline-none px-3.5 text-sm"
@@ -200,6 +247,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                     style={{ background: "#ccc" }}
                   />
                   <input
+                    name="email"
                     type="email"
                     placeholder="you@home.com"
                     className="flex-1 h-full bg-transparent outline-none px-3.5 text-sm"
@@ -233,6 +281,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                     style={{ background: "#ccc" }}
                   />
                   <input
+                    name="password"
                     type="password"
                     placeholder={
                       isSignup ? "Make it memorable" : "Your password"
@@ -242,6 +291,8 @@ export function AuthPage({ mode }: AuthPageProps) {
                   />
                 </div>
               </label>
+
+              {wrongLogin && <p className="text-red-500 text-sm">{error}</p>}
 
               {!isSignup && (
                 <div className="flex items-center justify-between text-sm pt-1">
@@ -262,7 +313,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               )}
 
               <button
-                type="button"
+                type="submit"
                 className="w-full rounded-2xl py-4 font-bold transition-all hover:scale-[1.02] active:scale-[0.99] mt-8"
                 style={{
                   background: "#CE2626",
