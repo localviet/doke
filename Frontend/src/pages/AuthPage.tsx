@@ -26,6 +26,28 @@ export function AuthPage({ mode }: AuthPageProps) {
   const [wrongLogin, setWrongLogin] = useState(false);
   const [error, setError] = useState("");
 
+  async function ensureProfile(user, name = null) {
+    if (!user) throw new Error("No user found");
+
+    const { data: existingProfile, error: fetchError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+
+    if (!existingProfile) {
+      const { error: insertError } = await supabase.from("profiles").insert({
+        id: user.id,
+        email: user.email,
+        name: name,
+      });
+
+      if (insertError) throw insertError;
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -53,6 +75,14 @@ export function AuthPage({ mode }: AuthPageProps) {
         return;
       }
 
+      try {
+        if (data.user) await ensureProfile(data.user, name);
+      } catch (profileError) {
+        console.error(profileError);
+        setError("Failed to create profile");
+        return;
+      }
+
       console.log("Signed up:", data);
       navigate("/email-confirm");
     } else {
@@ -65,6 +95,16 @@ export function AuthPage({ mode }: AuthPageProps) {
         console.error(error.message);
         setError(error.message);
         setWrongLogin(true);
+        return;
+      }
+
+      try {
+        if (data.user) {
+          await ensureProfile(data.user);
+        }
+      } catch (profileError) {
+        console.error(profileError);
+        setError("Failed to load profile");
         return;
       }
 
@@ -204,11 +244,11 @@ export function AuthPage({ mode }: AuthPageProps) {
                       height: 48,
                     }}
                   >
-                    <div className="flex items-center justify-center w-11 h-full flex-shrink-0">
+                    <div className="flex items-center justify-center w-11 h-full shrink-0">
                       <User size={18} color="#000000" />
                     </div>
                     <div
-                      className="w-px self-stretch my-2 flex-shrink-0"
+                      className="w-px self-stretch my-2 shrink-0"
                       style={{ background: "#ccc" }}
                     />
                     <input
@@ -239,11 +279,11 @@ export function AuthPage({ mode }: AuthPageProps) {
                     height: 48,
                   }}
                 >
-                  <div className="flex items-center justify-center w-11 h-full flex-shrink-0">
+                  <div className="flex items-center justify-center w-11 h-full shrink-0">
                     <Mail size={18} color="#000000" />
                   </div>
                   <div
-                    className="w-px self-stretch my-2 flex-shrink-0"
+                    className="w-px self-stretch my-2 shrink-0"
                     style={{ background: "#ccc" }}
                   />
                   <input
@@ -273,11 +313,11 @@ export function AuthPage({ mode }: AuthPageProps) {
                     height: 48,
                   }}
                 >
-                  <div className="flex items-center justify-center w-11 h-full flex-shrink-0">
+                  <div className="flex items-center justify-center w-11 h-full shrink-0">
                     <KeyRound size={18} color="#000000" />
                   </div>
                   <div
-                    className="w-px self-stretch my-2 flex-shrink-0"
+                    className="w-px self-stretch my-2 shrink-0"
                     style={{ background: "#ccc" }}
                   />
                   <input
