@@ -12,6 +12,7 @@ import { RankingsSection } from "./components/landing/RankingsSection";
 import { SocialProofSection } from "./components/landing/SocialProofSection";
 
 import ProtectedRoute from "./pages/ProtectedRoute";
+import RequireAuth from "./pages/RequireAuth";
 
 import { AuthPage } from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
@@ -53,7 +54,14 @@ export default function App() {
       <Route path="/login" element={<AuthPage mode="login" />} />
       <Route path="/signup" element={<AuthPage mode="signup" />} />
       <Route path="/email-confirm" element={<EmailConfirmation />} />
-      <Route path="/room-selection" element={<RoomSelection />} />
+      <Route
+        path="/room-selection"
+        element={
+          <RequireAuth>
+            <RoomSelection />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/dashboard"
         element={
