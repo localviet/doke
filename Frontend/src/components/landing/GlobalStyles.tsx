@@ -27,6 +27,12 @@ export function GlobalStyles() {
       .float-1 { animation: float 4s ease-in-out infinite; }
       .float-2 { animation: float2 5s ease-in-out infinite 0.5s; }
       .float-3 { animation: float 3.5s ease-in-out infinite 1s; }
+      html, body, #root {
+        background: #FFFDEB;
+      }
+      body {
+        overscroll-behavior-y: none;
+      }
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: #FFFDEB; }
       ::-webkit-scrollbar-thumb { background: #7DAACB; border-radius: 3px; }

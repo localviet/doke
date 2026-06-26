@@ -15,7 +15,7 @@ export function DashboardNav() {
       return;
     }
 
-    navigate("/");
+    navigate("/", { replace: true });
   }
 
   return (

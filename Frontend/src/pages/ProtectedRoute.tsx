@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
+import { useAuth } from "../context/useAuth";
 import { Navigate } from "react-router";
 import { supabase } from "../lib/supabaseClient";
 
@@ -13,24 +13,15 @@ type ProtectedRouteProps = {
 };
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
+  const { session, user, loading: authLoading } = useAuth();
+
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
 
   useEffect(() => {
-    async function getSessionAndProfile() {
-      const { data, error } = await supabase.auth.getSession();
+    async function getProfile() {
+      if (authLoading) return;
 
-      if (error) {
-        console.error(error.message);
-        setSession(null);
-        setProfile(null);
-        return;
-      }
-
-      const currentSession = data.session;
-      setSession(currentSession);
-
-      if (!currentSession) {
+      if (!user) {
         setProfile(null);
         return;
       }
@@ -38,7 +29,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("room_id")
-        .eq("id", currentSession.user.id)
+        .eq("id", user.id)
         .maybeSingle();
 
       if (profileError) {
@@ -50,10 +41,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       setProfile(profileData);
     }
 
-    getSessionAndProfile();
-  }, []);
+    getProfile();
+  }, [user, authLoading]);
 
-  if (session === undefined || profile === undefined) {
+  if (authLoading || profile === undefined) {
     return <div>Loading...</div>;
   }
 
